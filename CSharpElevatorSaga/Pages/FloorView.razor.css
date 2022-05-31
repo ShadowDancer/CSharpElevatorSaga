@@ -1,0 +1,31 @@
+﻿.floor-signs {
+    display: flex;
+    align-items: center;
+}
+
+.floor-number {
+    color: rgba(255, 255, 255, 0.15);
+    padding: 10px;
+    font-size: 64px;
+    height: 100%;
+}
+
+.wall-arrow {
+    color: rgba(255, 255, 255, 0.15);
+    padding: 10px;
+    font-size: 32px;
+    font-weight: bold;
+    height: 100%;
+}
+
+.floor-background {
+    display: flex;
+    height: 99px;
+    background: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0.2), rgba(255,255,255,0.24), rgba(255,255,255,0.1));
+}
+.people{
+    margin-top: auto;
+}
+.floor-line {
+    height: 1px;
+}

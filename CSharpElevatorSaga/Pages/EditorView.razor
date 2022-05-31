@@ -1,0 +1,62 @@
+﻿@using Microsoft.CodeAnalysis
+@inject IJSRuntime JS
+@inject Compiler Compiler
+
+<div class="editor-contianer">
+
+    <div id="editor"/>
+    <div class="compile-button-container">
+        <span class="compile-button" @onclick="CompileCode">Compile</span>
+        <label class="@("compilation-result-label " + CompileColorText)">@CompileLabel</label>
+    </div>
+    
+        <EditorDiagnosticsView Diagnostics=@Diagnostics />
+
+</div>
+
+@code {
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            const string InitialCode = @"static void Run(IElevator[] elevators, IFloor[] floors)
+{
+    var elevator = elevators.First();
+
+    elevator.OnIdle += () => {
+        elevator.DestinationQueue.Add(1);
+    };
+
+    // Put code here
+}";
+
+            JS.InvokeAsync<string>("initCodeMirror", "editor", InitialCode);
+        }
+    }
+
+    private async Task CompileCode()
+    {
+        var code = await JS.InvokeAsync<string>("getCode");
+        var result = await Compiler.CompileCodeAsync(code);
+        CompilationSuccess = result.Success;
+        Diagnostics = result.Diagnostics;
+
+        if (result.Success == true)
+        {
+            GameController.RunProgram(result.Program);
+        }
+    }
+
+    private bool? CompilationSuccess { get; set; } = null;
+
+    private string CompileLabel => CompilationSuccess == true ? "Compiled successfully!" : CompilationSuccess == false ? "Build finished with errors!" : "";
+
+    private string CompileColorText => CompilationSuccess == true ? "compilation-success" : CompilationSuccess == false ? "compilation-failure" : "";
+
+    private IReadOnlyList<Diagnostic> Diagnostics { get; set; } = new List<Diagnostic>();
+
+
+    [Parameter, EditorRequired]
+    public GameController GameController { get; set; } = null!;
+
+}

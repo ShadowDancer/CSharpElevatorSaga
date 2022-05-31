@@ -1,0 +1,40 @@
+﻿
+
+
+<div class="floor-background">
+    <div class="floor-signs">
+        <span class="floor-number">@Floor.Proxy.Number</span>
+        <span class="wall-arrow">↑</span>
+        <span class="wall-arrow">↓</span>
+    </div>
+    <div class="people">
+        <div class="input-queue">
+            @foreach (var person in Floor.WaitingLine)
+            {
+                <PersonView />
+            }
+
+        </div>
+    </div>
+
+    <div style="width: 300px;" />
+
+    <div class="people">
+        <div class="output-queue">
+            @foreach (var person in Floor.OutputLine)
+            {
+                <PersonView />
+            }
+        </div>
+    </div>
+</div>
+
+<div class="floor-line"></div>
+
+
+
+@code {
+
+    [Parameter, EditorRequired]
+    public Floor Floor { get; set; } = null!;
+}

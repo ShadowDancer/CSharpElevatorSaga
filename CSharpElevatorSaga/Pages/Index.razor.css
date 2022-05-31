@@ -1,0 +1,37 @@
+﻿.app-container {
+    background-color: #f0f0f0;
+    
+    width: 100vw;
+    min-height: 100vh;
+}
+
+h1 em {
+    font-size: large;
+}
+
+.lang-name{
+    color: purple;
+}
+
+.headers {
+    clear: both;
+    width: 100%;
+    background-color: white;
+    margin: 0;
+    padding: 0.3rem;
+}
+.app-column {
+    width: 80%;
+    margin: 0 auto;
+}
+
+
+.building-container {
+    background: rgb(112,20,232);
+    background: linear-gradient(180deg, rgba(112,20,232,1) 50%, rgba(59,51,221,1) 100%);
+    min-height: 30vh;
+}
+
+.footer {
+    min-height: 10vh;
+}

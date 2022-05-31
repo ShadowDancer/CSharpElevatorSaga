@@ -1,0 +1,45 @@
+﻿
+
+<div class="elevator" style=@style>
+    <div class="people">
+        @foreach (var person in Elevator.Cargo.Passengers)
+        {
+            <PersonView />
+        }
+    </div>
+</div>
+
+@code {
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        var control = Elevator.Controls;
+
+        int height = (Elevator.Floor) * 100;
+        if (control.State == ElevatorState.Moving)
+        {
+            const int totalHeight = 100;
+
+            int heightPercentage = (100 * control.ActivityTicks / 40);
+
+            if (control.TargetFloor >= Elevator.Floor)
+            {
+                height += (int)(totalHeight * heightPercentage / 100.0f);
+            }
+            else
+            {
+                height -= (int)(totalHeight * heightPercentage / 100.0f);
+            }
+        }
+
+        style = $"bottom: {height}px; left: 200px;";
+    }
+
+    [Parameter, EditorRequired]
+    public Elevator Elevator { get; set; } = null!;
+
+
+    [Parameter, EditorRequired]
+    public string? style { get; set; }
+}

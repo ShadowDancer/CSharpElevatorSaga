@@ -1,0 +1,25 @@
+﻿
+<div class="building-container">
+    <div class="building">
+        @foreach (var floor in Building.Floors.Reverse())
+        {
+            <FloorView Floor=floor />
+        }
+
+        @{
+            var i = 0;
+        }
+
+        @foreach (var elevator in Building.Elevators)
+        {
+            <ElevatorView Elevator=elevator style="@($"position: absolute; left: {i*50}px; bottom: 0")" />
+            i++;
+        }
+    </div>
+</div>
+
+
+@code {
+    [Parameter, EditorRequired]
+    public Building Building { get; set; } = null!;
+}

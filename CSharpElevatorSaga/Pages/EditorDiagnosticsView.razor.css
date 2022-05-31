@@ -1,0 +1,26 @@
+﻿.diag-container {
+    width: 100%;
+}
+.diag-header {
+    background: #e4e4e4;
+    border-top: 1px solid #bababa;
+    border-left: 1px solid #bababa;
+    border-right: 1px solid #bababa;
+    color: #212529;
+
+    padding: 0.3rem;
+    font-weight: bolder;
+}
+
+.diag-body {
+    color: white;
+    background-color: black;
+    font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+    word-wrap: break-word;
+}
+
+.line-number-cell {
+    height: 100%;
+    padding: 5px;
+    margin-bottom: auto;
+}

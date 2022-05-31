@@ -1,0 +1,39 @@
+﻿.editor-contianer {
+    margin-top: 1rem;
+}
+
+.compile-button {
+    border-radius: .25em;
+    color: #fff;
+    background-color: #512bd4;
+    border-radius: 4px;
+    padding: .25em .4em;
+
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.compile-button-container {
+    display: flex;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.compilation-result-label {
+    margin-left: auto;
+    border-color: #512bd4;
+    color: #512bd4;
+    background-color: white;
+    border-width: 1px;
+    border-style: solid;
+    padding: 5px;
+    align-items: center;
+}
+
+.compilation-success {
+    background-color: lime;
+}
+
+.compilation-failure {
+    background-color: red;
+}

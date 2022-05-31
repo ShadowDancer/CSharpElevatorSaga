@@ -1,0 +1,15 @@
+﻿.elevator {
+    border-width: 3px;
+    border-color: #909090;
+    border-style: solid;
+    width: 50px;
+    height: 80px;
+    background: rgb(112,20,232);
+    background: linear-gradient(180deg, rgba(112,20,232,1) 30%, rgba(59,51,221,1) 100%);
+    position: absolute;
+    display: flex;
+}t
+
+.people {
+    margin-top: auto;
+}

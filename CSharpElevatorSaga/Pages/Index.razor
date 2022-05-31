@@ -1,0 +1,39 @@
+﻿@page "/"
+
+<PageTitle>C# Elevator Saga</PageTitle>
+<div class="app-container">
+
+    <div class="headers">
+        <div class="app-column">
+            <h1><span class="lang-name">C#</span> Elevator Saga <em>The elevator programming game - but in c#</em></h1>
+        </div>
+    </div>
+
+    <div class="building-container">
+        <div class="app-column">
+            <BuildingView Building=@GameController.Building />
+        </div>
+    </div>
+
+    <div class="app-column">
+        <EditorView GameController=GameController />
+    </div>
+
+    <div class="footer">
+    </div>
+</div>
+
+@code {
+
+    public Index()
+    {
+        GameController.OnTickCompleted += GameTickCompleted;
+    }
+
+    void GameTickCompleted()
+    {
+        StateHasChanged();
+    }
+
+    GameController GameController { get; } = new();
+}
