@@ -5,6 +5,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 	<NoWarn>$(NoWarn);RS2008</NoWarn>
+    <InvariantGlobalization>true</InvariantGlobalization><!-- Disable globalization to reduce size -->
+
   </PropertyGroup>
 
   <ItemGroup>

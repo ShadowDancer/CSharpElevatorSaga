@@ -2,7 +2,8 @@
   <PropertyGroup>
 	<EnableNETAnalyzers>true</EnableNETAnalyzers>
 	<AnalysisLevel>latest-Recommended</AnalysisLevel>
-	<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+	<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>  <InvariantGlobalization>true</InvariantGlobalization>
+
   </PropertyGroup>
 </Project>
 
