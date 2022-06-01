@@ -9,6 +9,8 @@
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
     <link href="CSharpElevatorSaga.styles.css" rel="stylesheet" />
+    <link rel="stylesheet" data-name="vs/editor/editor.main"
+          href="monaco-editor/min/vs/editor/editor.main.css" />
 </head>
 
 <body>
@@ -21,10 +23,12 @@
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
     <script>
-        function initCodeMirror(id, code) {
-            window.codeEditor = CodeMirror(document.getElementById(id), {
+        function initCodeEditor(id, code) {
+            window.codeEditor = monaco.editor.create(document.getElementById(id), {
                 value: code,
-                mode: "text/x-csharp"
+                language: 'csharp',
+                width: '100%',
+                automaticLayout: true
             });
         }
         function getCode() {
@@ -32,11 +36,12 @@
         }
     </script>
 
-    <!-- code mirror -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/codemirror.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/codemirror.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0/mode/clike/clike.min.js"></script>
-    <!-- code mirror -->
+    <script>
+        var require = { paths: { vs: 'monaco-editor/min/vs' } };
+    </script>
+    <script src="monaco-editor/min/vs/loader.js"></script>
+    <script src="monaco-editor/min/vs/editor/editor.main.nls.js"></script>
+    <script src="monaco-editor/min/vs/editor/editor.main.js"></script>
 </body>
 
 </html>

@@ -4,7 +4,7 @@
 
 <div class="editor-contianer">
 
-    <div id="editor"/>
+    <div id="editor" class="editor"/>
     <div class="compile-button-container">
         <span class="compile-button" @onclick="CompileCode">Compile</span>
         <label class="@("compilation-result-label " + CompileColorText)">@CompileLabel</label>
@@ -30,7 +30,7 @@
     // Put code here
 }";
 
-            JS.InvokeAsync<string>("initCodeMirror", "editor", InitialCode);
+            JS.InvokeAsync<string>("initCodeEditor", "editor", InitialCode);
         }
     }
 
