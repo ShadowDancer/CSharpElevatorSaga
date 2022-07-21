@@ -1,6 +1,6 @@
 ﻿using CSharpElevatorSaga.Model;
 
-namespace CSharpElevatorSaga.Proxy;
+namespace CSharpElevatorSaga.Game.Proxy;
 
 public class FloorProxy : IFloor
 {
