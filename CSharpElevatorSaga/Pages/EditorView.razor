@@ -3,8 +3,8 @@
 @inject Compiler Compiler
 
 <div class="editor-contianer">
+    <MonacoEditor @ref="_editor" Id="sample-code-editor-123" ConstructionOptions="EditorConstructionOptions" />
 
-    <div id="editor"/>
     <div class="compile-button-container">
         <span class="compile-button" @onclick="CompileCode">Compile</span>
         <label class="@("compilation-result-label " + CompileColorText)">@CompileLabel</label>
@@ -15,11 +15,16 @@
 </div>
 
 @code {
-    protected override void OnAfterRender(bool firstRender)
+
+    private MonacoEditor _editor { get; set; }
+
+    private StandaloneEditorConstructionOptions EditorConstructionOptions(MonacoEditor editor)
     {
-        if (firstRender)
-        {
-            const string InitialCode = @"static void Run(IElevator[] elevators, IFloor[] floors)
+        return new StandaloneEditorConstructionOptions
+            {
+                Language = "javascript",
+                GlyphMargin = true,
+                Value = @"static void Run(IElevator[] elevators, IFloor[] floors)
 {
     var elevator = elevators.First();
 
@@ -28,15 +33,13 @@
     };
 
     // Put code here
-}";
-
-            JS.InvokeAsync<string>("initCodeMirror", "editor", InitialCode);
-        }
+}"
+            };
     }
 
     private async Task CompileCode()
     {
-        var code = await JS.InvokeAsync<string>("getCode");
+        var code = await _editor.GetValue();
         var result = await Compiler.CompileCodeAsync(code);
         CompilationSuccess = result.Success;
         Diagnostics = result.Diagnostics;

@@ -1,14 +1,10 @@
-﻿.editor-contianer {
-    margin-top: 1rem;
-}
-
+﻿
 .compile-button {
     border-radius: .25em;
     color: #fff;
     background-color: #512bd4;
     border-radius: 4px;
     padding: .25em .4em;
-
     margin-top: auto;
     margin-bottom: auto;
 }
