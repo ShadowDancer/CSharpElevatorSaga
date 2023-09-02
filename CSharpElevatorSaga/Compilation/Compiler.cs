@@ -13,7 +13,7 @@ public class Compiler
     private readonly IAssemblyResolver _assemblyResolver;
     private int _assemblyNumber;
     private bool _warmedUp;
-    private static IReadOnlyList<string> _assemblyFileNames = new string[]
+    private static readonly IReadOnlyList<string> AssemblyFileNames = new[]
         {
             "System.Collections.dll",
             "System.Console.dll",
@@ -40,15 +40,15 @@ public class Compiler
 
         _warmedUp = true;
         var metadata = new List<MetadataReference>();
-        foreach (var assemblyFileName in _assemblyFileNames)
+        foreach (var assemblyFileName in AssemblyFileNames)
         {
             try
             {
 
 #pragma warning disable CS8774 // Member must have a non-null value when exiting.
-            MetadataReference? refernce = await _assemblyResolver.GetAssembly(assemblyFileName);
+            MetadataReference reference = await _assemblyResolver.GetAssembly(assemblyFileName);
 #pragma warning restore CS8774 // Member must have a non-null value when exiting.
-            metadata.Add(refernce);
+            metadata.Add(reference);
             }
             catch
             {
@@ -78,7 +78,7 @@ public class Compiler
         }
         var diagnosticsConfiguration = new List<KeyValuePair<string, ReportDiagnostic>>()
         {
-            new KeyValuePair<string, ReportDiagnostic>("CS8321", ReportDiagnostic.Hidden)
+            new("CS8321", ReportDiagnostic.Hidden)
         };
         CSharpCompilation compilation = CSharpCompilation.Create(
             "Solution" + _assemblyNumber++,
@@ -86,7 +86,7 @@ public class Compiler
             _assemblyMetadata,
             new CSharpCompilationOptions(OutputKind.ConsoleApplication, false, specificDiagnosticOptions: diagnosticsConfiguration, concurrentBuild: false));
 
-        using (MemoryStream stream = new MemoryStream())
+        using (MemoryStream stream = new())
         {
             EmitResult result = compilation.Emit(stream);
 
@@ -121,7 +121,7 @@ public class Compiler
 
     private static SyntaxTree MakeUsingSyntaxTree()
     {
-        var usings = new string[] {
+        var usings = new[] {
             "System",
             "System.Linq",
             "System.Collections",
@@ -160,10 +160,10 @@ public class Compiler
         return CompileResult.Compiled(diagnostics, programDelegate);
     }
 
-    internal static DiagnosticDescriptor NoRunMethodRule = new DiagnosticDescriptor("ES0001", "Could not find Run", "Program does not contain static void Run(IElevator[] elevators, IFloor[] floors) function",
+    internal static DiagnosticDescriptor NoRunMethodRule = new("ES0001", "Could not find Run", "Program does not contain static void Run(IElevator[] elevators, IFloor[] floors) function",
   "Elevator Saga", DiagnosticSeverity.Error, isEnabledByDefault: true);
 
-    internal static DiagnosticDescriptor RunMethodHasInvalidSignatureRule = new DiagnosticDescriptor("ES0002", "Invalid Run method", "Function Run should have signature static void Run(IElevator[] elevators, IFloor[] floors)",
+    internal static DiagnosticDescriptor RunMethodHasInvalidSignatureRule = new("ES0002", "Invalid Run method", "Function Run should have signature static void Run(IElevator[] elevators, IFloor[] floors)",
   "Elevator Saga", DiagnosticSeverity.Error, isEnabledByDefault: true);
 
     public class CompileResult
@@ -175,9 +175,9 @@ public class Compiler
             Program = program;
         }
 
-        public static CompileResult Fail(IReadOnlyList<Diagnostic> diagnostics) => new CompileResult(false, diagnostics, null);
+        public static CompileResult Fail(IReadOnlyList<Diagnostic> diagnostics) => new(false, diagnostics, null);
 
-        public static CompileResult Compiled(IReadOnlyList<Diagnostic> diagnostics, ProgramEntryPoint.RunProgram program) => new CompileResult(true, diagnostics, program);
+        public static CompileResult Compiled(IReadOnlyList<Diagnostic> diagnostics, ProgramEntryPoint.RunProgram program) => new(true, diagnostics, program);
 
         [MemberNotNullWhen(true, nameof(Program))]
         public bool Success { get; }

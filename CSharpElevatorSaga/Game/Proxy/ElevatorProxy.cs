@@ -1,6 +1,6 @@
 ﻿using CSharpElevatorSaga.Model;
 
-namespace CSharpElevatorSaga.Proxy;
+namespace CSharpElevatorSaga.Game.Proxy;
 
 public class ElevatorProxy : IElevator
 {
@@ -9,7 +9,7 @@ public class ElevatorProxy : IElevator
         Floor = startingFloor;
     }
 
-    public IFloor Floor { get; set; } = null!;
+    public IFloor Floor { get; set; }
 
     public IList<int> DestinationQueue { get; } = new List<int>();
 
