@@ -1,7 +1,7 @@
-﻿using CSharpElevatorSaga.Implementation.Model;
+﻿using CSharpElevatorSaga.Game.Model;
 using CSharpElevatorSaga.Model;
 
-namespace CSharpElevatorSaga.Implementation;
+namespace CSharpElevatorSaga.Game;
 
 public class GameController
 {
@@ -9,8 +9,11 @@ public class GameController
 
     public GameController()
     {
-        Building = new Building(3, 1);
-        Timer = new Timer(GameTickHandler, 0, TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(16));
+        const int Fps = 60;
+
+        Level = new Level(3, 1, new ScoringStub(), new UniformPeopleGenerator(60));
+        Building = new Building(3, 1, Level.Scoring);
+        Timer = new Timer(GameTickHandler, 0, TimeSpan.Zero, TimeSpan.FromMilliseconds(1000.0/Fps));
     }
 
     public delegate void OnGameTickCompleted();
@@ -22,14 +25,12 @@ public class GameController
         for (int i = 0; i < _gameSpeed; i++)
         {
             Building.Tick();
+            Level.Scoring.Tick();
+            Level.PeopleGenerator.Tick(Building);
         }
 
         OnTickCompleted?.Invoke();
     }
-
-    public int Floors { get; } = 3;
-
-    public int Elevators { get; } = 1;
 
     /// <summary>
     /// Number of game ticks per frame
@@ -40,13 +41,16 @@ public class GameController
         set => Math.Clamp(value, 0, 16);
     }
 
-    public Building Building { get; set; }
+    public Level Level { get; }
 
+    public Building Building { get; private set; }
+
+    // ReSharper disable once UnusedAutoPropertyAccessor.Local
     private Timer Timer { get; }
 
-    public void RunProgram(ProgramEntryPoint.RunProgram program)
+    public void RunProgram(ProgramEntryPoint.RunProgram? program)
     {
-        Building = new Building(Floors, Elevators);
+        Building = new Building(Level.Stories, Level.Elevators, Level.Scoring);
         var elevators = Building.Elevators.Select(elevator => (IElevator)elevator.Proxy).ToArray();
         var floors = Building.Floors.Select(floor => (IFloor)floor.Proxy).ToArray();
         program?.Invoke(elevators, floors);

@@ -1,8 +1,9 @@
-﻿
+﻿@using CSharpElevatorSaga.Game.Model
 
-<div class="elevator" style=@style>
+
+<div class="elevator" style=@Style>
     <div class="people">
-        @foreach (var person in Elevator.Cargo.Passengers)
+        @foreach (var _ in Elevator.Cargo.Passengers)
         {
             <PersonView />
         }
@@ -33,7 +34,7 @@
             }
         }
 
-        style = $"bottom: {height}px; left: 200px;";
+        Style = $"bottom: {height}px; left: 200px;";
     }
 
     [Parameter, EditorRequired]
@@ -41,5 +42,5 @@
 
 
     [Parameter, EditorRequired]
-    public string? style { get; set; }
+    public string? Style { get; set; }
 }

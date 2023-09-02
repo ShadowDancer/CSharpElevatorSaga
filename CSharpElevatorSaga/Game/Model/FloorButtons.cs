@@ -1,6 +1,6 @@
 ﻿using CSharpElevatorSaga.Model;
 
-namespace CSharpElevatorSaga.Implementation.Model;
+namespace CSharpElevatorSaga.Game.Model;
 
 public class FloorButtons : IFloorButtons
 {

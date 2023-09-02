@@ -1,5 +1,6 @@
 ﻿@using Microsoft.CodeAnalysis
 @inject IJSRuntime JS
+@using CSharpElevatorSaga.Game
 @inject Compiler Compiler
 
 <div class="editor-contianer">
@@ -9,8 +10,8 @@
         <span class="compile-button" @onclick="CompileCode">Compile</span>
         <label class="@("compilation-result-label " + CompileColorText)">@CompileLabel</label>
     </div>
-    
-        <EditorDiagnosticsView Diagnostics=@Diagnostics />
+
+    <EditorDiagnosticsView Diagnostics="@Diagnostics"/>
 
 </div>
 
@@ -41,7 +42,7 @@
         CompilationSuccess = result.Success;
         Diagnostics = result.Diagnostics;
 
-        if (result.Success == true)
+        if (result.Success)
         {
             GameController.RunProgram(result.Program);
         }
@@ -58,5 +59,4 @@
 
     [Parameter, EditorRequired]
     public GameController GameController { get; set; } = null!;
-
 }

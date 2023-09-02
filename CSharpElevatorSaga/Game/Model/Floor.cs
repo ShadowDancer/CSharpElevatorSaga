@@ -1,6 +1,6 @@
-﻿using CSharpElevatorSaga.Proxy;
+﻿using CSharpElevatorSaga.Game.Proxy;
 
-namespace CSharpElevatorSaga.Implementation.Model;
+namespace CSharpElevatorSaga.Game.Model;
 
 public class Floor
 {
@@ -9,10 +9,6 @@ public class Floor
     public Floor(FloorProxy floorProxy)
     {
         Proxy = floorProxy;
-        for (int i = 0; i < 5; i++)
-        {
-            WaitingLine.Enqueue(new Person(0));
-        }
     }
 
     public FloorButtons Buttons { get; } = new();

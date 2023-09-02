@@ -1,4 +1,5 @@
-﻿
+﻿@using CSharpElevatorSaga.Game.Model
+
 
 
 <div class="floor-background">
@@ -9,7 +10,7 @@
     </div>
     <div class="people">
         <div class="input-queue">
-            @foreach (var person in Floor.WaitingLine)
+            @foreach (var _ in Floor.WaitingLine)
             {
                 <PersonView />
             }
@@ -17,11 +18,11 @@
         </div>
     </div>
 
-    <div style="width: 300px;" />
+    <div style="width: 300px;"></div>
 
     <div class="people">
         <div class="output-queue">
-            @foreach (var person in Floor.OutputLine)
+            @foreach (var _ in Floor.OutputLine)
             {
                 <PersonView />
             }

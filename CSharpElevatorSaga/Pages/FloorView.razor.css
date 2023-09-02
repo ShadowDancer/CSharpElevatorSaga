@@ -29,3 +29,13 @@
 .floor-line {
     height: 1px;
 }
+
+.input-queue{
+    position: absolute;
+    bottom: 0;
+}
+
+.output-queue{
+    position: absolute;
+    bottom: 0;
+}

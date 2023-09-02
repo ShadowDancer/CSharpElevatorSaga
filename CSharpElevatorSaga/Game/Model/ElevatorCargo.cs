@@ -1,6 +1,6 @@
-﻿using CSharpElevatorSaga.Proxy;
+﻿using CSharpElevatorSaga.Game.Proxy;
 
-namespace CSharpElevatorSaga.Implementation.Model;
+namespace CSharpElevatorSaga.Game.Model;
 
 public class ElevatorCargo
 {
@@ -13,7 +13,7 @@ public class ElevatorCargo
 
     public int MaxPassengers { get; set; } = 3;
 
-    public List<Person> Passengers { get; } = new List<Person>();
+    public List<Person> Passengers { get; } = new();
 
     public bool CanTakePassenger => Passengers.Count < MaxPassengers;
 

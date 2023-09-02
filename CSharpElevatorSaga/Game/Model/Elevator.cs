@@ -1,16 +1,15 @@
-﻿using CSharpElevatorSaga.Proxy;
+﻿using CSharpElevatorSaga.Game.Proxy;
 
-namespace CSharpElevatorSaga.Implementation.Model;
+namespace CSharpElevatorSaga.Game.Model;
 
 public class Elevator
 {
-
     public Elevator(ElevatorProxy proxy)
     {
         Proxy = proxy;
-        Controls = new(proxy);
+        Controls = new ElevatorControls(proxy);
         DirectionIndicators = proxy.DirectionIndicators;
-        Cargo = new(proxy);
+        Cargo = new ElevatorCargo(proxy);
     }
 
     public int Floor => Proxy.Floor.Number;
