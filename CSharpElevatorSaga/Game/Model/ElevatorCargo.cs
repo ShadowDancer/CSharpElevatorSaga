@@ -1,36 +1,40 @@
-﻿using CSharpElevatorSaga.Proxy;
+﻿using CSharpElevatorSaga.Game.Proxy;
 
-namespace CSharpElevatorSaga.Implementation.Model;
+namespace CSharpElevatorSaga.Game.Model;
 
 public class ElevatorCargo
 {
-    private ElevatorProxy _proxy;
+    private readonly ElevatorProxy _proxy;
+    private readonly Elevator _elevator;
+    private readonly Building _building;
+    private const float PersonSpacing = 15f;
 
-    public ElevatorCargo(ElevatorProxy proxy)
+    public ElevatorCargo(ElevatorProxy proxy, Elevator elevator, Building building)
     {
         _proxy = proxy;
+        _elevator = elevator;
+        _building = building;
     }
-
+    
     public int MaxPassengers { get; set; } = 3;
 
-    public List<Person> Passengers { get; } = new List<Person>();
+    public IEnumerable<Person> Passengers => _building.People.Where(p => p.State == PersonState.InElevator);
 
-    public bool CanTakePassenger => Passengers.Count < MaxPassengers;
+    public bool CanTakePassenger => Passengers.Count() < MaxPassengers;
 
     public void TakePassenger(Person person)
     {
-        Passengers.Add(person);
+        person.State = PersonState.InElevator;
+        UpdatePassengerPositions();
     }
 
-    internal List<Person> RemovePassengersGoingTo(int floor)
+    public void UpdatePassengerPositions()
     {
-        var leavingPassengers = Passengers.Where(n => n.TargetFloor == floor).ToList();
-
-        foreach (var passenger in leavingPassengers)
+        var passengers = Passengers.ToList();
+        for (int i = 0; i < passengers.Count; i++)
         {
-            Passengers.Remove(passenger);
+            var xPos = _elevator.Position.X + (i * PersonSpacing);
+            passengers[i].Position = new Position(xPos, _elevator.Position.Y);
         }
-
-        return leavingPassengers;
     }
 }

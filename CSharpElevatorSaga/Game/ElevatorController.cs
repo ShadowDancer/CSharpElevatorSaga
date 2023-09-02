@@ -1,20 +1,22 @@
-﻿using CSharpElevatorSaga.Implementation.Model;
+﻿using CSharpElevatorSaga.Game.Model;
 
-namespace CSharpElevatorSaga.Implementation;
+namespace CSharpElevatorSaga.Game;
 
 public class ElevatorController
 {
     private readonly Elevator _elevator;
     private readonly Floor _floor;
     private readonly Building _building;
+    private readonly IScoring _scoring;
 
     private ElevatorControls Controls => _elevator.Controls;
 
-    public ElevatorController(Elevator elevator, Floor floor, Building building)
+    public ElevatorController(Elevator elevator, Floor floor, Building building, IScoring scoring)
     {
         _elevator = elevator;
         _floor = floor;
         _building = building;
+        _scoring = scoring;
     }
 
     internal void Tick()
@@ -45,33 +47,43 @@ public class ElevatorController
 
         if (oldDirection != 0 && directionVector != 0 && directionVector != oldDirection)
         {
-            // Because activity ticks always go up, we need to recompute it when changing direction
             Controls.ActivityTicks = _building.Properties.TicksPerStory - Controls.ActivityTicks;
         }
 
-        bool reachedFloor = Controls.ActivityTicks >= _building.Properties.TicksPerStory;
-        if (!reachedFloor)
-        {
-            return;
-        }
+        float progress = (float)Controls.ActivityTicks / _building.Properties.TicksPerStory;
+        _elevator.UpdatePosition(Controls.TargetFloor, progress);
 
+        bool reachedFloor = Controls.ActivityTicks >= _building.Properties.TicksPerStory;
+        if (reachedFloor)
+        {
+            OnFloorReached(directionVector);
+        }
+    }
+
+    private void OnFloorReached(int directionVector)
+    {
         Controls.ActivityTicks = 0;
 
         var nextFloorNumber = Math.Clamp(_elevator.Floor + directionVector, 0, _building.Floors.Length);
         var newFloor = _building.Floors[nextFloorNumber];
         _elevator.Proxy.Floor = newFloor.Proxy;
 
-
         if (_elevator.Floor == Controls.TargetFloor)
         {
-            var leavingPassengers = _elevator.Cargo.RemovePassengersGoingTo(_elevator.Floor);
+            var leavingPassengers = _elevator.Cargo.Passengers.Where(p => p.TargetFloor == _elevator.Floor).ToList();
+            Console.WriteLine($"Leaving passengers: " + string.Join(", ", leavingPassengers.Select(p => p.Id)));
 
-            newFloor.OutputLine.AddRange(leavingPassengers);
-
-            while (_elevator.Controls.DestinationQueue.Remove(_elevator.Floor) == true)
+            foreach (var passenger in leavingPassengers)
             {
-                ;
+                newFloor.AddPersonToOutputLine(passenger);
             }
+
+            _scoring.PersonTransported(leavingPassengers.Count);
+
+            while (_elevator.Controls.DestinationQueue.Remove(_elevator.Floor))
+            {
+            }
+            _scoring.ElevatorMoved();
             Transition(ElevatorState.Idle);
 
             _elevator.Proxy.RaiseOnStopped();
@@ -80,13 +92,16 @@ public class ElevatorController
 
     private void HandleIdle()
     {
-        while (_floor.WaitingLine.Any() && _elevator.Cargo.CanTakePassenger)
+        var waitingPeople = _floor.WaitingLine.ToList();
+        while (waitingPeople.Any() && _elevator.Cargo.CanTakePassenger)
         {
-            var newPassenger = _floor.WaitingLine.Dequeue();
+            var newPassenger = waitingPeople.First();
             _elevator.Cargo.TakePassenger(newPassenger);
 
             PressButtonInElevator(newPassenger.TargetFloor);
+            waitingPeople.RemoveAt(0);
         }
+        _floor.UpdateWaitingLinePositions();
 
         bool minimumStayTimeElapsing = Controls.ActivityTicks < _building.Properties.MinimumStayTicks;
         if (minimumStayTimeElapsing)
@@ -112,11 +127,13 @@ public class ElevatorController
 
     private void PressButtonInElevator(int targetFloor)
     {
-        if (!_elevator.RequestedFloors.Contains(targetFloor))
+        if (_elevator.RequestedFloors.Contains(targetFloor))
         {
-            _elevator.RequestedFloors.Add(targetFloor);
-            _elevator.Proxy.RaiseOnButtonPressed(targetFloor);
+            return;
         }
+
+        _elevator.RequestedFloors.Add(targetFloor);
+        _elevator.Proxy.RaiseOnButtonPressed(targetFloor);
     }
 
     private void Transition(ElevatorState newState)

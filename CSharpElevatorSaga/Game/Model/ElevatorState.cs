@@ -1,4 +1,4 @@
-﻿namespace CSharpElevatorSaga.Implementation.Model;
+﻿namespace CSharpElevatorSaga.Game.Model;
 
 public enum ElevatorState
 {

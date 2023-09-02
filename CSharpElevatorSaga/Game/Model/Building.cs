@@ -1,22 +1,35 @@
 ﻿using System.Collections.Immutable;
+using System.Collections.Generic;
 
-namespace CSharpElevatorSaga.Implementation.Model;
+namespace CSharpElevatorSaga.Game.Model;
 
 public class Building
 {
-    public Building(int stories, int elevators)
-    {
-        Floors = Enumerable.Range(0, stories).Select(n => new Floor(new Proxy.FloorProxy(n))).ToImmutableArray();
+    private readonly IScoring _scoring;
 
-        Elevators = Enumerable.Range(0, elevators).Select(n => new Elevator(new Proxy.ElevatorProxy(Floors[0].Proxy))).ToImmutableArray();
+    private int NextPersonId { get; set; } = 0;
+
+    public Building(int stories, int elevators, IScoring scoring)
+    {
+        _scoring = scoring;
+        Floors = Enumerable.Range(0, stories).Select(floorNumber => new Floor(new Proxy.FloorProxy(floorNumber), People.Where(p => p.CurrentFloor == floorNumber))).ToImmutableArray();
+        Elevators = Enumerable.Range(0, elevators).Select(_ => new Elevator(new Proxy.ElevatorProxy(Floors[0].Proxy), this)).ToImmutableArray();
     }
 
     public ImmutableArray<Elevator> Elevators { get; }
 
     public ImmutableArray<Floor> Floors { get; }
 
-    public BuildingProperties Properties { get; } = new BuildingProperties();
+    public BuildingProperties Properties { get; } = new();
 
+    public List<Person> People { get; } = new();
+
+    public Person CreatePerson(int floor){
+        var person = new Person(NextPersonId++, floor); 
+        People.Add(person);
+        Floors[floor].AddPersonToWaitingLine(person);
+        return person;
+    }
 
     public void Tick()
     {
@@ -29,6 +42,6 @@ public class Building
     private void UpdateElevator(Elevator elevator)
     {
         var elevatorFloor = Floors[elevator.Floor];
-        new ElevatorController(elevator, elevatorFloor, this).Tick();
+        new ElevatorController(elevator, elevatorFloor, this, _scoring).Tick();
     }
 }
