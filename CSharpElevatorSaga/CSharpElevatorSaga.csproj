@@ -1,18 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-	<NoWarn>$(NoWarn);RS2008</NoWarn>
+	  <NoWarn>$(NoWarn);RS2008</NoWarn>
     <InvariantGlobalization>true</InvariantGlobalization><!-- Disable globalization to reduce size -->
 
+    <!-- TODO It may be possible to link required assemblies https://github.com/unoplatform/uno/discussions/10564#discussioncomment-4437362 -->
+    <!-- Webcil is new assembly format, stored in .wasm size. It seems that these assemblies cannot be loaded dynamically unlike DLLs. I need these assemblies to compile code correctly -->
+    <WasmEnableWebcil>false</WasmEnableWebcil>
+
+    <!-- .NET 9 compresses assemblies, and adds fingerprint to them. We need to load assemblies at runtime - this way it doesn't interfere -->
+    <StaticWebAssetFingerprintingEnabled>false</StaticWebAssetFingerprintingEnabled> 
+    <StaticWebAssetsFingerprintContent>false</StaticWebAssetsFingerprintContent>
+    <DisableBuildCompression>true</DisableBuildCompression>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.5" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.5" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.3" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.13.0" />
   </ItemGroup>
 
   <ItemGroup>
