@@ -11,7 +11,7 @@ public class GameController
     {
         const int Fps = 60;
 
-        Level = new Level(3, 1, new ScoringStub(), new UniformPeopleGenerator(60));
+        Level = new Level(3, 1, new ScoringStub(), new UniformPeopleGenerator(30));
         Building = new Building(3, 1, Level.Scoring);
         Timer = new Timer(GameTickHandler, 0, TimeSpan.Zero, TimeSpan.FromMilliseconds(1000.0/Fps));
     }

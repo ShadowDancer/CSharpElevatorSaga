@@ -10,44 +10,48 @@ public class Floor
     
     public float Y { get; }
     
-    public float WaitingLineX { get; } = 50f;
     
-    public float OutputLineX { get; } = 300f;
-    
-    public float PersonSpacing { get; } = 25f;
+    private BuildingProperties _buildingProperties;
 
-    public Floor(FloorProxy floorProxy, IEnumerable<Person> peopleOnFloor)
+    public Floor(FloorProxy floorProxy, IEnumerable<Person> peopleOnFloor, BuildingProperties buildingProperties)
     {
         Proxy = floorProxy;
-        Y = floorProxy.Number * 100f;
+        Y = floorProxy.Number * buildingProperties.FloorHeight;
         _peopleOnFloor = peopleOnFloor;
+        _buildingProperties = buildingProperties;
     }
 
     public FloorButtons Buttons { get; } = new();
 
-    public IEnumerable<Person> WaitingLine => _peopleOnFloor.Where(p => p.State == PersonState.Waiting);
+    public IEnumerable<Person> ElevatorQueue => _peopleOnFloor.Where(p => p.State == PersonState.Waiting);
 
-    public IEnumerable<Person> OutputLine => _peopleOnFloor.Where(p => p.State == PersonState.Exited);
+    public IEnumerable<Person> Exiting => _peopleOnFloor.Where(p => p.State == PersonState.Exiting);
     
     public void AddPersonToWaitingLine(Person person)
     {
         person.State = PersonState.Waiting;
         person.CurrentFloor = Proxy.Number;
-        UpdateWaitingLinePositions();
+        person.SetPosition(QueuePositionToWorldPosition(ElevatorQueue.Count()-1), _buildingProperties.MinimumStayTicks);
     }
     
     public void UpdateWaitingLinePositions()
     {
-        var waitingLine = WaitingLine.ToList();
-        for (int i = 0; i < waitingLine.Count; i++){
-            waitingLine[i].Position = new Position(WaitingLineX + (i * PersonSpacing), Y);
-        }        
+        var waitingLine = ElevatorQueue.ToList();
+        for (int i = 0; i < waitingLine.Count; i++)
+        {
+            waitingLine[i].SetPosition(QueuePositionToWorldPosition(i), _buildingProperties.QueueRepositionTicks);
+        }
+    }
+
+    private Position QueuePositionToWorldPosition(int i)
+    {
+        return new Position(_buildingProperties.ElevatorQueueStartX - (i * _buildingProperties.PersonWidth), Y);
     }
 
     public void AddPersonToOutputLine(Person person)
     {
-        person.State = PersonState.Exited;
+        person.State = PersonState.Exiting;
         person.CurrentFloor = Proxy.Number;
-        person.Position = new Position(OutputLineX + (OutputLine.Count() * PersonSpacing), Y);
+        person.SetPosition(new Position(_buildingProperties.OutputLineStart + (Exiting.Count() * _buildingProperties.PersonWidth), Y), _buildingProperties.MinimumStayTicks);
     }
 }

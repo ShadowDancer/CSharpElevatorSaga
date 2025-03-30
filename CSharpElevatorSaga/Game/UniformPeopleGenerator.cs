@@ -26,31 +26,26 @@ public class UniformPeopleGenerator : IPeopleGenerator
 
     private void GeneratePerson(Building building)
     {
-        FindEmptyFloor(building);
+        FindFloorWithSpace(building);
 
-        if (building.Floors[_floorNumber].WaitingLine.Count() >= MaxPeoplePerFloor)
+        if (building.Floors[_floorNumber].ElevatorQueue.Count() >= MaxPeoplePerFloor)
         {
             return;
         }
         
-        var targetFloor = new Random().Next(0, building.Floors.Length - 1);
-        if (targetFloor >= _floorNumber)
-        {
-            targetFloor++;
-        }
 
-        building.CreatePerson(targetFloor);
+        building.CreatePerson(_floorNumber);
         NextFloor(building);
     }
 
-    private void FindEmptyFloor(Building building)
+    private void FindFloorWithSpace(Building building)
     {
         int attempts = 0;
-        while (building.Floors[_floorNumber].WaitingLine.Count() > MaxPeoplePerFloor)
+        while (building.Floors[_floorNumber].ElevatorQueue.Count() >= MaxPeoplePerFloor)
         {
             NextFloor(building);
             attempts++;
-            if (attempts > building.Floors.Length)
+            if (attempts >= building.Floors.Length)
             {
                 break;
             }

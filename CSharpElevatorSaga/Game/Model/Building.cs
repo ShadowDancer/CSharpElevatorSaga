@@ -7,13 +7,13 @@ public class Building
 {
     private readonly IScoring _scoring;
 
-    private int NextPersonId { get; set; } = 0;
+    private int NextPersonId { get; set; }
 
     public Building(int stories, int elevators, IScoring scoring)
     {
         _scoring = scoring;
-        Floors = Enumerable.Range(0, stories).Select(floorNumber => new Floor(new Proxy.FloorProxy(floorNumber), People.Where(p => p.CurrentFloor == floorNumber))).ToImmutableArray();
-        Elevators = Enumerable.Range(0, elevators).Select(_ => new Elevator(new Proxy.ElevatorProxy(Floors[0].Proxy), this)).ToImmutableArray();
+        Floors = Enumerable.Range(0, stories).Select(floorNumber => new Floor(new Proxy.FloorProxy(floorNumber), People.Where(p => p.CurrentFloor == floorNumber), Properties)).ToImmutableArray();
+        Elevators = Enumerable.Range(0, elevators).Select(n => new Elevator(new Proxy.ElevatorProxy(Floors[0].Proxy), this, n)).ToImmutableArray();
     }
 
     public ImmutableArray<Elevator> Elevators { get; }
@@ -24,15 +24,23 @@ public class Building
 
     public List<Person> People { get; } = new();
 
-    public Person CreatePerson(int floor){
-        var person = new Person(NextPersonId++, floor); 
+    public Person CreatePerson(int floorNumber){
+        var person = new Person(NextPersonId++, floorNumber, Properties.PersonWidth); 
         People.Add(person);
-        Floors[floor].AddPersonToWaitingLine(person);
+        var floor = Floors[floorNumber];
+        person.SetPosition(new Position(-Properties.PersonWidth, floor.Y), 0);
+        floor.AddPersonToWaitingLine(person);
+        
         return person;
     }
 
     public void Tick()
     {
+        foreach (var person in People)
+        {
+            person.Tick();
+        }
+
         foreach (var elevator in Elevators)
         {
             UpdateElevator(elevator);

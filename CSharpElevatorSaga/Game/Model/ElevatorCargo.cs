@@ -6,35 +6,55 @@ public class ElevatorCargo
 {
     private readonly ElevatorProxy _proxy;
     private readonly Elevator _elevator;
-    private readonly Building _building;
-    private const float PersonSpacing = 15f;
+    private readonly BuildingProperties _buildingProperties;
+    private readonly Person?[] _slots;
 
-    public ElevatorCargo(ElevatorProxy proxy, Elevator elevator, Building building)
+    public ElevatorCargo(ElevatorProxy proxy, Elevator elevator, BuildingProperties buildingProperties)
     {
         _proxy = proxy;
         _elevator = elevator;
-        _building = building;
+        _buildingProperties = buildingProperties;
+        _slots = new Person?[MaxPassengers];
     }
     
     public int MaxPassengers { get; set; } = 3;
 
-    public IEnumerable<Person> Passengers => _building.People.Where(p => p.State == PersonState.InElevator);
+    public IEnumerable<Person> Passengers => _slots.Where(p => p != null)!;
 
-    public bool CanTakePassenger => Passengers.Count() < MaxPassengers;
+    public bool CanTakePassenger => _slots.Any(slot => slot == null);
 
     public void TakePassenger(Person person)
     {
+        var emptySlot = Array.IndexOf(_slots, null);
+        if (emptySlot == -1)
+        {
+            throw new InvalidOperationException("No empty slots in elevator");
+        }
+        
+        _slots[emptySlot] = person;
         person.State = PersonState.InElevator;
-        UpdatePassengerPositions();
+        UpdatePassengerPositions(_buildingProperties.MinimumStayTicks);
     }
 
-    public void UpdatePassengerPositions()
+    public void RemovePassenger(Person person)
     {
-        var passengers = Passengers.ToList();
-        for (int i = 0; i < passengers.Count; i++)
+        var slotIndex = Array.IndexOf(_slots, person);
+        if (slotIndex != -1)
         {
-            var xPos = _elevator.Position.X + (i * PersonSpacing);
-            passengers[i].Position = new Position(xPos, _elevator.Position.Y);
+            _slots[slotIndex] = null;
+        }
+    }
+
+    public void UpdatePassengerPositions(int ticks = 0)
+    {
+        for (int i = 0; i < _slots.Length; i++)
+        {
+            var person = _slots[i];
+            if (person != null)
+            {
+                var slotX = _elevator.Position.X + (i * _buildingProperties.PersonWidth);
+                person.SetPosition(new Position(slotX, _elevator.Position.Y), ticks);
+            }
         }
     }
 }

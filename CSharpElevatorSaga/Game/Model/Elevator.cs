@@ -4,13 +4,14 @@ namespace CSharpElevatorSaga.Game.Model;
 
 public class Elevator
 {
-    public Elevator(ElevatorProxy proxy, Building building)
+    public Elevator(ElevatorProxy proxy, Building building, int position)
     {
         Proxy = proxy;
         Controls = new ElevatorControls(proxy);
         DirectionIndicators = proxy.DirectionIndicators;
-        Position = new Position(200f, proxy.Floor.Number * 100f);
-        Cargo = new ElevatorCargo(proxy, this, building);
+        var properties = building.Properties;
+        Position = new Position(properties.ElevatorQueueStartX + properties.QueueSpacing + position * (properties.ElevatorWidth + properties.ElevatorSpacing), proxy.Floor.Number * properties.FloorHeight);
+        Cargo = new ElevatorCargo(proxy, this, properties);
     }
 
     public int Floor => Proxy.Floor.Number;
@@ -28,15 +29,4 @@ public class Elevator
     public ElevatorCargo Cargo { get; }
 
     public List<int> RequestedFloors => Proxy.RequestedFloors;
-    
-    public void UpdatePosition(int targetFloor, float progress)
-    {
-        float sourceY = Floor * 100f;
-        int directionVector = Math.Sign(targetFloor - Floor);
-        int nextFloor = Floor + directionVector;
-        float nextFloorY = nextFloor * 100f;
-        Position = new Position(Position.X, sourceY + (nextFloorY - sourceY) * progress);
-        
-        Cargo.UpdatePassengerPositions();
-    }
 }

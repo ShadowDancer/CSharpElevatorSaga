@@ -30,6 +30,9 @@ public class ElevatorController
             case ElevatorState.Idle:
                 HandleIdle();
                 break;
+            case ElevatorState.Stopped:
+                HandleStopped();
+                break;
         }
     }
 
@@ -51,13 +54,25 @@ public class ElevatorController
         }
 
         float progress = (float)Controls.ActivityTicks / _building.Properties.TicksPerStory;
-        _elevator.UpdatePosition(Controls.TargetFloor, progress);
+        UpdateElevatorPosition(Controls.TargetFloor, progress);
 
         bool reachedFloor = Controls.ActivityTicks >= _building.Properties.TicksPerStory;
         if (reachedFloor)
         {
+            Transition(ElevatorState.Stopped);
             OnFloorReached(directionVector);
         }
+    }
+
+    private void UpdateElevatorPosition(int targetFloor, float progress)
+    {
+        float sourceY = _elevator.Floor * 100f;
+        int directionVector = Math.Sign(targetFloor - _elevator.Floor);
+        int nextFloor = _elevator.Floor + directionVector;
+        float nextFloorY = nextFloor * 100f;
+        _elevator.Position = new Position(_elevator.Position.X, sourceY + (nextFloorY - sourceY) * progress);
+        
+        _elevator.Cargo.UpdatePassengerPositions();
     }
 
     private void OnFloorReached(int directionVector)
@@ -67,14 +82,14 @@ public class ElevatorController
         var nextFloorNumber = Math.Clamp(_elevator.Floor + directionVector, 0, _building.Floors.Length);
         var newFloor = _building.Floors[nextFloorNumber];
         _elevator.Proxy.Floor = newFloor.Proxy;
+        _scoring.ElevatorMoved();
 
         if (_elevator.Floor == Controls.TargetFloor)
         {
             var leavingPassengers = _elevator.Cargo.Passengers.Where(p => p.TargetFloor == _elevator.Floor).ToList();
-            Console.WriteLine($"Leaving passengers: " + string.Join(", ", leavingPassengers.Select(p => p.Id)));
-
             foreach (var passenger in leavingPassengers)
             {
+                _elevator.Cargo.RemovePassenger(passenger);
                 newFloor.AddPersonToOutputLine(passenger);
             }
 
@@ -83,28 +98,32 @@ public class ElevatorController
             while (_elevator.Controls.DestinationQueue.Remove(_elevator.Floor))
             {
             }
-            _scoring.ElevatorMoved();
-            Transition(ElevatorState.Idle);
 
+            Transition(ElevatorState.Stopped);
             _elevator.Proxy.RaiseOnStopped();
         }
+    }
+    
+    private void HandleStopped()
+    {
+        if(TryLoadPassengers())
+        {
+            return;
+        }
+
+
+        bool minimumStayTimeElapsing = Controls.ActivityTicks < _building.Properties.MinimumStayTicks;
+        if (minimumStayTimeElapsing)
+        {
+            return;
+        }
+            
+        Transition(ElevatorState.Idle);
     }
 
     private void HandleIdle()
     {
-        var waitingPeople = _floor.WaitingLine.ToList();
-        while (waitingPeople.Any() && _elevator.Cargo.CanTakePassenger)
-        {
-            var newPassenger = waitingPeople.First();
-            _elevator.Cargo.TakePassenger(newPassenger);
-
-            PressButtonInElevator(newPassenger.TargetFloor);
-            waitingPeople.RemoveAt(0);
-        }
-        _floor.UpdateWaitingLinePositions();
-
-        bool minimumStayTimeElapsing = Controls.ActivityTicks < _building.Properties.MinimumStayTicks;
-        if (minimumStayTimeElapsing)
+        if(TryLoadPassengers())
         {
             return;
         }
@@ -123,6 +142,29 @@ public class ElevatorController
         }
 
         _elevator.Proxy.RaiseOnIdle();
+    }
+
+    private bool TryLoadPassengers()
+    {
+        bool loadedPassenger = false;
+        var waitingPeople = _floor.ElevatorQueue.ToList();
+        for (int i = 0; i < waitingPeople.Count && _elevator.Cargo.CanTakePassenger; i++)
+        {
+            var newPassenger = waitingPeople[i];
+            _elevator.Cargo.TakePassenger(newPassenger);
+
+            PressButtonInElevator(newPassenger.TargetFloor);
+            loadedPassenger = true;
+        }
+
+        if(loadedPassenger)
+        {
+            _floor.UpdateWaitingLinePositions();
+            Transition(ElevatorState.Stopped);
+        }
+
+
+        return loadedPassenger;
     }
 
     private void PressButtonInElevator(int targetFloor)
